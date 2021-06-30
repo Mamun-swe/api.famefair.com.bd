@@ -38,8 +38,10 @@ adminRouter.get("/vendor/:id", VendorController.Show)
 adminRouter.put("/vendor/:id", VendorController.Update)
 adminRouter.post("/vendor/search", VendorController.Search)
 
-//  --------- Product Routes ------------
+//  --------- Product Routes ------------ Working for product creation ------------------------------------------
 adminRouter.get("/product", ProductController.Index)
+adminRouter.post("/product", ProductController.Store)
+adminRouter.get("/product/:id", ProductController.Show)
 
 
 module.exports = { adminRouter }

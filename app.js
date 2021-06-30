@@ -23,9 +23,9 @@ app.use('/uploads/banner', express.static('uploads/banner/'))
 app.use('/uploads/brand', express.static('uploads/brand/'))
 app.use('/uploads/category', express.static('uploads/category/'))
 
-app.use('/uploads/products/additional', express.static('uploads/products/additional/'))
-app.use('/uploads/products/thumbnail/large', express.static('uploads/products/thumbnail/large/'))
-app.use('/uploads/products/thumbnail/cropped', express.static('uploads/products/thumbnail/cropped/'))
+app.use('/uploads/product/additional', express.static('uploads/product/additional/'))
+app.use('/uploads/product/large', express.static('uploads/product/large/'))
+app.use('/uploads/product/small', express.static('uploads/product/small/'))
 app.use('/uploads/customer', express.static('upload/customer/'))
 
 // Routes
@@ -34,7 +34,7 @@ const Route = require('./api/Routes/Index')
 // API URL's
 app.use("/api/v1/", Route)
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
     res.send("Hello I am node.js application")
 })
 

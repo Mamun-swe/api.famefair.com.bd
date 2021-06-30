@@ -1,5 +1,5 @@
 
-const Validation = product => {
+const Store = product => {
     let errors = {}
 
     if (!product.name) errors.name = "Name is required"
@@ -12,7 +12,7 @@ const Validation = product => {
     if (!product.salePrice) errors.salePrice = "Sale price is required"
     if (!product.description) errors.description = "Description is required"
     if (!product.image) errors.image = "Image is required"
-    if (!product.additionalImages) errors.additionalImages = "Additional images is required"
+    if (!product.images) errors.images = "Images is required"
 
     return {
         errors,
@@ -21,5 +21,5 @@ const Validation = product => {
 }
 
 module.exports = {
-    Validation
+    Store
 }

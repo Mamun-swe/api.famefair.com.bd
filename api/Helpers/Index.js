@@ -19,9 +19,8 @@ const Host = (req) => {
 const FileUpload = async (data, path) => {
     try {
         const image = data
-        const extension = image.name.split('.')[1]
 
-        const newName = Date.now() + '.' + extension
+        const newName = Date.now() + '.jpg'
         uploadPath = path + newName
         const moveFile = image.mv(uploadPath)
 
@@ -38,7 +37,7 @@ const SmFileUpload = async (file, uploadpath) => {
         let image = await Jimp.read(file.data)
         await image.resize(200, 200)
         await image.quality(50)
-        const newFile = 'product-' + Date.now() + '.png'
+        const newFile = 'product-' + Date.now() + '.jpg'
         await image.write(uploadpath + '/' + newFile)
         return newFile
     } catch (error) {
@@ -53,7 +52,7 @@ const LgFileUpload = async (file, uploadpath) => {
         let image = await Jimp.read(file.data)
         await image.resize(800, 800)
         await image.quality(50)
-        const newFile = 'product-' + Date.now() + '.png'
+        const newFile = 'product-' + Date.now() + '.jpg'
         await image.write(uploadpath + '/' + newFile)
         return newFile
     } catch (error) {
