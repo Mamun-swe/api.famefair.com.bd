@@ -1,0 +1,233 @@
+const bcrypt = require('bcryptjs')
+const Customer = require('../../../Models/Customer')
+const CheckId = require('../../Middleware/CheckId')
+const Validator = require('../../Validator/Customer')
+const { Paginate } = require('../../Helpers/Pagination')
+
+// List of customers
+const Index = async (req, res, next) => {
+    try {
+        const limit = 30
+        let { page } = req.query
+        if (!parseInt(page)) page = 1
+        if (page && parseInt(page) <= 0) page = 1
+
+        const totalItems = await Customer.countDocuments().exec()
+        const customers = await Customer.find({}, { name: 1, email: 1, phone: 1 })
+            .sort({ _id: -1 })
+            .skip((parseInt(page) * limit) - limit)
+            .limit(limit)
+            .exec()
+
+        if (!customers.length) {
+            return res.status(404).json({
+                status: false,
+                message: 'Customers not found.'
+            })
+        }
+
+        res.status(200).json({
+            status: true,
+            customers,
+            pagination: Paginate({ page, limit, totalItems })
+        })
+    } catch (error) {
+        if (error) next(error)
+    }
+}
+
+// Show specific customer
+const Show = async (req, res, next) => {
+    try {
+        const { id } = req.params
+        await CheckId(id)
+
+        const customer = await Customer.findById({ _id: id }, { password: 0 }).exec()
+        if (!customer) {
+            return res.status(404).json({
+                status: false,
+                message: 'Customer not found.'
+            })
+        }
+
+        res.status(200).json({
+            status: true,
+            customer
+        })
+    } catch (error) {
+        if (error) next(error)
+    }
+}
+
+// Store customer
+const Store = async (req, res, next) => {
+    try {
+        const {
+            name,
+            email,
+            phone,
+            gender,
+            maritalStatus,
+            dob,
+            shippingArea,
+            deliveryAddress,
+            password
+        } = req.body
+
+        // validate check
+        const validate = await Validator.CreateByAdmin(req.body)
+        if (validate.isValid === false) {
+            return res.status(422).json({
+                status: false,
+                message: validate.error
+            })
+        }
+
+        // Check email
+        const existEmail = await Customer.findOne({ email: email })
+        if (existEmail)
+            return res.status(422).json({
+                status: false,
+                message: 'Email already used.'
+            })
+
+        // Check phone
+        const existPhone = await Customer.findOne({ phone: phone })
+        if (existPhone)
+            return res.status(422).json({
+                status: false,
+                message: 'Phone already used.'
+            })
+
+        // Password Hash
+        const hashPassword = await bcrypt.hash(password, 10)
+        const newCustomer = new Customer({
+            name,
+            email,
+            phone,
+            gender,
+            maritalStatus,
+            dob,
+            shippingArea,
+            deliveryAddress,
+            password: hashPassword
+        })
+
+        const saveUser = await newCustomer.save()
+        if (!saveUser)
+            return res.status(501).json({
+                status: false,
+                message: 'Failed to create account.'
+            })
+
+        res.status(201).json({
+            status: true,
+            message: 'Successfully account created.'
+        })
+
+    } catch (error) {
+        if (error) next(error)
+    }
+}
+
+// Update specific customer
+const Update = async (req, res, next) => {
+    try {
+        const { id } = req.params
+        await CheckId(id)
+        const {
+            name,
+            email,
+            phone,
+            gender,
+            maritalStatus,
+            dob,
+            shippingArea,
+            deliveryAddress
+        } = req.body
+
+        // validate check
+        const validate = await Validator.Update(req.body)
+        if (validate.isValid === false) {
+            return res.status(422).json({
+                status: false,
+                message: validate.error
+            })
+        }
+
+        const updateCustomer = await Customer.findByIdAndUpdate(
+            { _id: id },
+            {
+                $set: {
+                    name,
+                    email,
+                    phone,
+                    gender,
+                    maritalStatus,
+                    dob,
+                    shippingArea,
+                    deliveryAddress
+                }
+            }
+        ).exec()
+
+        if (!updateCustomer) {
+            return res.status(501).json({
+                status: false,
+                message: 'Failed to update customer'
+            })
+        }
+
+        res.status(201).json({
+            status: true,
+            message: 'Successfully customer updated'
+        })
+    } catch (error) {
+        if (error) next(error)
+    }
+}
+
+// Search customer (name, email, phone)
+const Search = async (req, res, next) => {
+    try {
+        const { query } = req.body
+
+        if (!query) {
+            return res.status(422).json({
+                status: false,
+                query: 'Query is required'
+            })
+        }
+
+        let queryValue = new RegExp(query, 'i')
+        let results = await Customer.find(
+            { $or: [{ name: queryValue }, { email: queryValue }, { phone: queryValue }] },
+            { name: 1, email: 1, phone: 1 }
+        )
+            .sort({ _id: -1 })
+            .exec()
+
+        if (!results.length) {
+            return res.status(501).json({
+                status: false,
+                message: 'Customer not found.'
+            })
+        }
+
+        res.status(200).json({
+            status: true,
+            customers: results
+        })
+
+    } catch (error) {
+        if (error) next(error)
+    }
+}
+
+module.exports = {
+    Index,
+    Show,
+    Store,
+    Update,
+    Search
+}

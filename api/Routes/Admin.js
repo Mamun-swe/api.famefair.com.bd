@@ -6,6 +6,8 @@ const BannerController = require("../Controllers/Admin/Banner")
 const BrandController = require("../Controllers/Admin/Brand")
 const VendorController = require("../Controllers/Admin/Vendor")
 const ProductController = require("../Controllers/Admin/Product")
+const CustomerController = require("../Controllers/Admin/Customer")
+const RatingReviewController = require("../Controllers/Admin/RatingReview")
 
 //  ---------- Option Route -----------
 adminRouter.get("/options", OptionController.Index)
@@ -33,8 +35,6 @@ adminRouter.delete("/brand/:id", BrandController.Delete)
 //  --------- Vendor Routes ------------
 adminRouter.get("/vendor", VendorController.Index)
 adminRouter.post("/vendor", VendorController.Create)
-
-// Need fix in vendor show controller   ------------------------------------ ///////////////////
 adminRouter.get("/vendor/:id", VendorController.Show)
 adminRouter.put("/vendor/:id", VendorController.Update)
 adminRouter.post("/vendor/search", VendorController.Search)
@@ -50,6 +50,17 @@ adminRouter.put("/product/additional-image/:id", ProductController.AddAdditional
 adminRouter.delete("/product/additional-image/:id/:file", ProductController.RemoveAdditionalImage)
 adminRouter.post("/product/search", ProductController.Search)
 adminRouter.get("/product/search/:sku", ProductController.SearchBySKU)
+
+//  --------- Customer Routes ------------ 
+adminRouter.get("/customer", CustomerController.Index)
+adminRouter.get("/customer/:id", CustomerController.Show)
+adminRouter.post("/customer", CustomerController.Store)
+adminRouter.put("/customer/:id", CustomerController.Update)
+adminRouter.post("/customer/search", CustomerController.Search)
+
+//  --------- Rating & Review Routes ------------ 
+adminRouter.get("/review", RatingReviewController.Index)
+adminRouter.put("/review/:id", RatingReviewController.Update)
 
 
 module.exports = { adminRouter }

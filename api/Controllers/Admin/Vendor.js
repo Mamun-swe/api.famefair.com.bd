@@ -43,7 +43,7 @@ const Show = async (req, res, next) => {
         await CheckId(id)
 
         let result = await Vendor.findById({ _id: id })
-            .populate('products', '_id sku name thumbnail.small stockAmount purchasePrice salePrice')
+            .populate('products', '_id sku name images.small stockAmount purchasePrice salePrice')
             .exec()
 
         if (!result) {
@@ -90,7 +90,7 @@ const Show = async (req, res, next) => {
                     stockAmount: product.stockAmount,
                     purchasePrice: product.purchasePrice,
                     salePrice: product.salePrice,
-                    image: Host(req) + "uploads/products/small/" + product.thumbnail.small
+                    image: Host(req) + "uploads/product/small/" + product.images.small
                 }
             }) : null
         }
@@ -101,10 +101,7 @@ const Show = async (req, res, next) => {
         })
 
     } catch (error) {
-        if (error) {
-            console.log(error)
-            next(error)
-        }
+        if (error) next(error)
     }
 }
 
@@ -210,10 +207,7 @@ const Create = async (req, res, next) => {
         })
 
     } catch (error) {
-        if (error) {
-            console.log(error)
-            next(error)
-        }
+        if (error) next(error)
     }
 }
 

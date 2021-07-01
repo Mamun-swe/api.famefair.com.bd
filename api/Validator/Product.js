@@ -20,7 +20,6 @@ const Store = product => {
     }
 }
 
-
 const Update = product => {
     let errors = {}
 
