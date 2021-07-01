@@ -45,37 +45,6 @@ const Index = async (req, res, next) => {
     }
 }
 
-// Index as options
-const IndexAsOption = async (req, res, next) => {
-    try {
-        let options = []
-        const results = await Brand.find({}, { name: 1 }).sort({ name: 1 }).exec()
-
-        if (!results.length) {
-            return res.status(404).json({
-                status: false,
-                message: 'Brand not available'
-            })
-        }
-
-        for (let i = 0; i < results.length; i++) {
-            const element = results[i]
-            options.push({
-                label: element.name,
-                value: element._id
-            })
-        }
-
-        res.status(200).json({
-            status: true,
-            brands: options
-        })
-    } catch (error) {
-        if (error) next(error)
-    }
-}
-
-
 // Create new brand
 const Store = async (req, res, next) => {
     try {
@@ -295,7 +264,6 @@ const Delete = async (req, res, next) => {
 
 module.exports = {
     Index,
-    IndexAsOption,
     Store,
     Show,
     UpdateName,

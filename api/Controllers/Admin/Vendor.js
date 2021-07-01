@@ -36,37 +36,6 @@ const Index = async (req, res, next) => {
     }
 }
 
-// List of all vendor as options
-const IndexAsOption = async (req, res, next) => {
-    try {
-        let vendors = []
-        const results = await Vendor.find({}, { name: 1, address: 1 }).exec()
-
-        if (!results) {
-            return res.status(404).json({
-                status: false,
-                message: 'Vendor not found'
-            })
-        }
-
-        for (let i = 0; i < results.length; i++) {
-            const element = results[i]
-            vendors.push({
-                label: `${element.name} - ${element.address}`,
-                value: element._id
-            })
-        }
-
-        res.status(200).json({
-            status: true,
-            vendors
-        })
-
-    } catch (error) {
-        if (error) next(error)
-    }
-}
-
 // Show specific vendor
 const Show = async (req, res, next) => {
     try {
@@ -387,7 +356,6 @@ const Search = async (req, res, next) => {
 
 module.exports = {
     Index,
-    IndexAsOption,
     Show,
     Create,
     Update,
