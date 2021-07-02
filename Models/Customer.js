@@ -63,7 +63,13 @@ const customerSchema = new Schema({
         type: String,
         trim: true,
         default: null
-    }
+    },
+    role: {
+        type: String,
+        trim: true,
+        default: 'Customer',
+        enum: ['Customer']
+    },
 }, {
     timestamps: true
 })

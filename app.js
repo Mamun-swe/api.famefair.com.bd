@@ -65,7 +65,6 @@ app.use((error, req, res, next) => {
     })
 })
 
-
 // DB Connection here
 mongoose.connect(process.env.DB_URL, {
     useNewUrlParser: true,

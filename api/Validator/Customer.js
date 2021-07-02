@@ -2,7 +2,7 @@
 const Login = customer => {
     let error = {}
 
-    if (!customer.email) error.email = "Email is required"
+    if (!customer.phone) error.phone = "Phone is required"
     if (!customer.password) error.password = "Password is required"
 
     return {
