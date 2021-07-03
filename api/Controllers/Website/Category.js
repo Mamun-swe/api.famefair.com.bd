@@ -1,7 +1,8 @@
-
+const Product = require("../../../Models/Product")
 const Category = require("../../../Models/Category")
 const { Host } = require("../../Helpers/Index")
 const { Paginate } = require("../../Helpers/Pagination")
+const { RedisClient } = require("../../Cache/Index")
 
 // List of categories with product
 const Index = async (req, res, next) => {
@@ -79,7 +80,113 @@ const Index = async (req, res, next) => {
     }
 }
 
+// Show specific category
+const Show = async (req, res, next) => {
+    try {
+        const { slug } = req.params
+
+        let result = await Category.findOne(
+            { slug: slug },
+            { slug: 1, image: 1 })
+            .exec()
+
+        if (!result) {
+            return res.status(404).json({
+                status: false,
+                message: "Category not available."
+            })
+        }
+
+        result.image = result.image ? Host(req) + "uploads/category/" + result.image : null
+
+        // set data to cache
+        RedisClient.setex(slug, 3600, JSON.stringify(result))
+
+        res.status(200).json({
+            status: true,
+            category: result
+        })
+    } catch (error) {
+        if (error) next(error)
+    }
+}
+
+// Specific category products
+const Products = async (req, res, next) => {
+    try {
+        let products = []
+        const { category } = req.params
+
+        const limit = 30
+        let { page } = req.query
+        if (!parseInt(page)) page = 1
+        if (page && parseInt(page) <= 0) page = 1
+
+        // Count total documents
+        const totalItems = await Product.countDocuments(
+            {
+                $and: [
+                    { category: category },
+                    { isActive: true },
+                    { stockAmount: { $gt: 0 } },
+                    { vendorRequest: "Approved" },
+                ]
+            }
+        ).exec()
+
+        // Find matched products
+        const results = await Product.find(
+            {
+                $and: [
+                    { category: category },
+                    { isActive: true },
+                    { stockAmount: { $gt: 0 } },
+                    { vendorRequest: "Approved" },
+                ]
+            },
+            {
+                name: 1,
+                slug: 1,
+                "images.small": 1
+            }
+        )
+            .sort({ _id: -1 })
+            .skip((parseInt(page) * limit) - limit)
+            .limit(limit)
+            .exec()
+
+        if (!results && !results.length) {
+            return res.status(404).json({
+                status: false,
+                message: "No products available."
+            })
+        }
+
+        // Modify results
+        if (results && results.length) {
+            for (let i = 0; i < results.length; i++) {
+                const element = results[i]
+                products.push({
+                    _id: element._id,
+                    slug: element.slug,
+                    name: element.name,
+                    image: element.images.small ? Host(req) + "uploads/product/small/" + element.images.small : null
+                })
+            }
+        }
+
+        res.status(200).json({
+            status: true,
+            products,
+            pagination: Paginate({ page, limit, totalItems })
+        })
+    } catch (error) {
+        if (error) next(error)
+    }
+}
 
 module.exports = {
-    Index
+    Index,
+    Show,
+    Products
 }
