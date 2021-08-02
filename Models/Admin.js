@@ -40,7 +40,7 @@ const adminSchema = new Schema({
         type: String,
         trim: true,
         default: 'Super admin',
-        enum: ['Super admin', 'Admin', 'Manager', 'Accountent', 'Content Officer']
+        required: true
     },
     status: {
         type: String,

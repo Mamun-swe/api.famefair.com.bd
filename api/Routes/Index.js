@@ -1,15 +1,18 @@
 const express = require('express')
 const router = express.Router()
-const { SuperAdmin } = require("../Middleware/Permission")
 
+const { webRouter } = require("./Web")
 const { authRouter } = require("./Auth")
 const { adminRouter } = require("./Admin")
 const { customerRouter } = require("./Customer")
-const { websiteRouter } = require("./Website")
+const { aclRouter } = require("./ACL")
 
+router.use("/web", webRouter)
 router.use("/auth", authRouter)
-router.use("/admin", SuperAdmin, adminRouter)
+
+router.use("/admin", adminRouter)
 router.use("/customer", customerRouter)
-router.use("/website", websiteRouter)
+
+router.use("/acl", aclRouter)
 
 module.exports = router

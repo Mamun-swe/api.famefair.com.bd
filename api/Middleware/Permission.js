@@ -1,7 +1,11 @@
 const jwt = require('jsonwebtoken')
+const Role = require("../../Models/Role")
+const { RouteGroupName } = require("../Helpers/Index")
 
-const SuperAdmin = async (req, res, next) => {
+// Admin Permission
+const Admin = async (req, res, next) => {
     try {
+        const pathGroup = RouteGroupName(req.path)
         const token = await req.headers.authorization
         if (!token) return res.status(404).json({ message: 'Token not found' })
 
@@ -9,14 +13,18 @@ const SuperAdmin = async (req, res, next) => {
         const splitToken = await req.headers.authorization.split(' ')[1]
         const decode = await jwt.verify(splitToken, process.env.JWT_SECRET)
 
-        // check role
-        if (decode.role === 'Super admin' || 'Content Officer') {
-            req.user = decode
-            next()
+        // Match with roles
+        const isRole = await Role.findOne({
+            $and: [
+                { role: decode.role },
+                { rights: { $in: [pathGroup] } }
+            ]
+        }).exec()
 
-        } else {
-            return res.status(401).json({ message: 'You have no permissions to access' })
-        }
+        if (!isRole) return res.status(501).json({ message: "You have no access." })
+
+        req.user = decode
+        next()
 
     } catch (error) {
         if (error) {
@@ -27,6 +35,7 @@ const SuperAdmin = async (req, res, next) => {
         }
     }
 }
+
 
 
 // Customer Permission
@@ -62,6 +71,6 @@ const Customer = async (req, res, next) => {
 
 
 module.exports = {
-    SuperAdmin,
+    Admin,
     Customer
 }

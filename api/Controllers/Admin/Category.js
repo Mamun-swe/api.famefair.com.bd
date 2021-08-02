@@ -8,26 +8,21 @@ const Index = async (req, res, next) => {
     try {
         let results = await Category.find({}, { name: 1, image: 1, products: 1 }).sort({ _id: -1 }).exec()
 
-        if (!results.length) {
-            return res.status(404).json({
-                status: false,
-                message: 'Category not available'
+        // Modify category
+        if (results.length) {
+            results = await results.map(item => {
+                return {
+                    _id: item._id,
+                    name: item.name,
+                    products: item.products.length,
+                    image: item.image ? Host(req) + "uploads/category/" + item.image : null
+                }
             })
         }
 
-        // Modify category
-        results = await results.map(item => {
-            return {
-                _id: item._id,
-                name: item.name,
-                products: item.products.length,
-                image: item.image ? Host(req) + "uploads/category/" + item.image : null
-            }
-        })
-
         res.status(200).json({
             status: true,
-            categories: results
+            data: results
         })
 
     } catch (error) {
@@ -91,7 +86,7 @@ const Show = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            category: item
+            data: item
         })
 
     } catch (error) {
@@ -117,7 +112,7 @@ const Update = async (req, res, next) => {
 
         const updateCategory = await Category.findOneAndUpdate(
             { _id: id },
-            { $set: { name: name, slug: Slug(name) } },
+            { $set: { name: name } },
             { new: true }).exec()
 
         if (!updateCategory) {

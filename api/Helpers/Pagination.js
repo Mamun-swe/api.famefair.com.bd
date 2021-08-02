@@ -1,4 +1,18 @@
 
+// Pagination query
+const PaginateQueryParams = data => {
+    let limit = 10
+    let page = 1
+
+    if (data.page) page = parseInt(data.page)
+    if (data.page && parseInt(data.page) <= 0) page = 1
+
+    if (data.limit) limit = parseInt(data.limit)
+    if (data.limit && parseInt(data.limit) < 10) limit = 10
+
+    return { limit, page }
+}
+
 // Next page
 const NextPage = (page, totalPage) => {
     if (page && page >= totalPage) {
@@ -15,7 +29,7 @@ const PrevPage = (page) => {
     return page - 1
 }
 
-
+// Pagination
 const Paginate = (data) => {
     const page = parseInt(data.page)
     const limit = parseInt(data.limit)
@@ -25,14 +39,17 @@ const Paginate = (data) => {
 
     const pageTotal = Math.ceil(totalItems / limit)
     return {
-        totalItems: totalItems,
-        totalPage: pageTotal,
-        currentPage: page,
+        items: totalItems,
         limit: limit,
-        prevPage: PrevPage(page),
-        nextPage: NextPage(page, pageTotal)
+        page: page,
+        totalPage: pageTotal,
+        prev: PrevPage(page),
+        next: NextPage(page, pageTotal)
     }
 }
 
 
-module.exports = { Paginate }
+module.exports = {
+    PaginateQueryParams,
+    Paginate
+}

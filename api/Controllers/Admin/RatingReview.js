@@ -2,15 +2,12 @@ const RatingReview = require("../../../Models/RatingReview")
 const Validator = require("../../Validator/RatingReview")
 const CheckId = require("../../Middleware/CheckId")
 const { Host } = require("../../Helpers/Index")
-const { Paginate } = require("../../Helpers/Pagination")
+const { PaginateQueryParams, Paginate } = require("../../Helpers/Pagination")
 
 // List of ratings & reviews
 const Index = async (req, res, next) => {
     try {
-        const limit = 30
-        let { page } = req.query
-        if (!parseInt(page)) page = 1
-        if (page && parseInt(page) <= 0) page = 1
+        const { limit, page } = PaginateQueryParams(req.query)
 
         const totalItems = await RatingReview.countDocuments().exec()
         let results = await RatingReview.find({}, { updatedAt: 0 })
@@ -20,13 +17,6 @@ const Index = async (req, res, next) => {
             .skip((parseInt(page) * limit) - limit)
             .limit(limit)
             .exec()
-
-        if (!results.length) {
-            return res.status(404).json({
-                status: false,
-                message: 'No review found.'
-            })
-        }
 
         results = await results.map(result => {
             return {
@@ -47,7 +37,7 @@ const Index = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            ratingReviews: results,
+            data: results,
             pagination: Paginate({ page, limit, totalItems })
         })
 

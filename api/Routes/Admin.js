@@ -1,6 +1,6 @@
 const express = require('express')
 const adminRouter = express.Router()
-const AuthController = require("../Controllers/Admin/Auth")
+const AdminController = require("../Controllers/Admin/Admin")
 const DashboardController = require("../Controllers/Admin/Dashboard")
 const OptionController = require("../Controllers/Admin/Option")
 const CategoryController = require("../Controllers/Admin/Category")
@@ -11,11 +11,11 @@ const ProductController = require("../Controllers/Admin/Product")
 const CustomerController = require("../Controllers/Admin/Customer")
 const RatingReviewController = require("../Controllers/Admin/RatingReview")
 
-// ----------- Auth Routes ------------
-adminRouter.get("/admin", AuthController.Index)
-adminRouter.get("/admin/:id", AuthController.Show)
-adminRouter.post("/admin", AuthController.Create)
-adminRouter.put("/admin/:id", AuthController.Update)
+// ----------- Admin Routes ------------
+adminRouter.get("/admin", AdminController.Index)
+adminRouter.get("/admin/:id", AdminController.Show)
+adminRouter.post("/admin", AdminController.Create)
+adminRouter.put("/admin/:id", AdminController.Update)
 
 //  ---------- Dashboard Route -----------
 adminRouter.get("/dashboard", DashboardController.Index)

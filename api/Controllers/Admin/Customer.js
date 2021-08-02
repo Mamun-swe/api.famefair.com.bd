@@ -2,15 +2,12 @@ const bcrypt = require('bcryptjs')
 const Customer = require('../../../Models/Customer')
 const CheckId = require('../../Middleware/CheckId')
 const Validator = require('../../Validator/Customer')
-const { Paginate } = require('../../Helpers/Pagination')
+const { PaginateQueryParams, Paginate } = require('../../Helpers/Pagination')
 
 // List of customers
 const Index = async (req, res, next) => {
     try {
-        const limit = 30
-        let { page } = req.query
-        if (!parseInt(page)) page = 1
-        if (page && parseInt(page) <= 0) page = 1
+        const { limit, page } = PaginateQueryParams(req.query)
 
         const totalItems = await Customer.countDocuments().exec()
         const customers = await Customer.find({}, { name: 1, email: 1, phone: 1 })
@@ -19,16 +16,9 @@ const Index = async (req, res, next) => {
             .limit(limit)
             .exec()
 
-        if (!customers.length) {
-            return res.status(404).json({
-                status: false,
-                message: 'Customers not found.'
-            })
-        }
-
         res.status(200).json({
             status: true,
-            customers,
+            data: customers,
             pagination: Paginate({ page, limit, totalItems })
         })
     } catch (error) {
@@ -43,6 +33,7 @@ const Show = async (req, res, next) => {
         await CheckId(id)
 
         const customer = await Customer.findById({ _id: id }, { password: 0 }).exec()
+
         if (!customer) {
             return res.status(404).json({
                 status: false,
@@ -52,7 +43,7 @@ const Show = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            customer
+            data: customer
         })
     } catch (error) {
         if (error) next(error)
@@ -207,18 +198,10 @@ const Search = async (req, res, next) => {
             .sort({ _id: -1 })
             .exec()
 
-        if (!results.length) {
-            return res.status(501).json({
-                status: false,
-                message: 'Customer not found.'
-            })
-        }
-
         res.status(200).json({
             status: true,
-            customers: results
+            data: results
         })
-
     } catch (error) {
         if (error) next(error)
     }

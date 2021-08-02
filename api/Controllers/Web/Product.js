@@ -54,7 +54,7 @@ const Show = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            product: result
+            data: result
         })
     } catch (error) {
         if (error) next(error)

@@ -1,6 +1,6 @@
 const Product = require("../../../Models/Product")
 const { Host } = require("../../Helpers/Index")
-const { Paginate } = require("../../Helpers/Pagination")
+const { PaginateQueryParams, Paginate } = require("../../Helpers/Pagination")
 
 // Search suggestion
 const Suggestion = async (req, res, next) => {
@@ -39,7 +39,7 @@ const Suggestion = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            results
+            data: results
         })
     } catch (error) {
         if (error) next(error)
@@ -50,11 +50,7 @@ const Suggestion = async (req, res, next) => {
 const Results = async (req, res, next) => {
     try {
         const { query } = req.params
-
-        const limit = 30
-        let { page } = req.query
-        if (!parseInt(page)) page = 1
-        if (page && parseInt(page) <= 0) page = 1
+        const { limit, page } = PaginateQueryParams(req.query)
 
         // Count total documents in matches
         const totalItems = await Product.countDocuments(
@@ -89,13 +85,6 @@ const Results = async (req, res, next) => {
             .limit(limit)
             .exec()
 
-        if (!results.length) {
-            return res.status(404).json({
-                status: false,
-                message: 'Result not found.'
-            })
-        }
-
         // Modify results
         results = await results.map(item => {
             return {
@@ -108,7 +97,7 @@ const Results = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            products: results,
+            data: results,
             pagination: Paginate({ page, limit, totalItems })
         })
     } catch (error) {

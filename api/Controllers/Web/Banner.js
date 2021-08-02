@@ -22,7 +22,7 @@ const Index = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            banners: results
+            data: results
         })
     } catch (error) {
         if (error) next(error)

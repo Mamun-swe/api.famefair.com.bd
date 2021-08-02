@@ -2,7 +2,7 @@ const express = require('express')
 const customerRouter = express.Router()
 
 
-// ---------- Website ----------
+// ---------- Web ----------
 // customerRouter.get('/index', Client.Index)
 
 

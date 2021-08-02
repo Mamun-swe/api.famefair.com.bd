@@ -2,16 +2,13 @@ const bcrypt = require("bcryptjs")
 const Vendor = require("../../../Models/Vendor")
 const CheckId = require("../../Middleware/CheckId")
 const Validator = require("../../Validator/Vendor")
-const { Paginate } = require("../../Helpers/Pagination")
 const { Host, Slug } = require("../../Helpers/Index")
+const { PaginateQueryParams, Paginate } = require("../../Helpers/Pagination")
 
 // List of vendors
 const Index = async (req, res, next) => {
     try {
-        const limit = 30
-        let { page } = req.query
-        if (!parseInt(page)) page = 1
-        if (page && parseInt(page) <= 0) page = 1
+        const { limit, page } = PaginateQueryParams(req.query)
 
         const totalItems = await Vendor.countDocuments().exec()
         const results = await Vendor.find({}, { name: 1, email: 1, phone: 1, address: 1 })
@@ -19,16 +16,9 @@ const Index = async (req, res, next) => {
             .limit(limit)
             .exec()
 
-        if (!results.length) {
-            return res.status(404).json({
-                status: false,
-                message: 'Vendors not found.'
-            })
-        }
-
         res.status(200).json({
             status: true,
-            vendors: results,
+            data: results,
             pagination: Paginate({ page, limit, totalItems })
         })
     } catch (error) {
@@ -97,7 +87,7 @@ const Show = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            vendor: finalVendor
+            data: finalVendor
         })
 
     } catch (error) {
@@ -330,16 +320,9 @@ const Search = async (req, res, next) => {
             .sort({ _id: 1 })
             .exec()
 
-        if (!results.length) {
-            return res.status(501).json({
-                status: false,
-                message: 'Vendor not found.'
-            })
-        }
-
         res.status(200).json({
             status: true,
-            vendors: results
+            data: results
         })
 
     } catch (error) {

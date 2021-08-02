@@ -1,16 +1,13 @@
 const Brand = require("../../../Models/Brand")
 const Validator = require("../../Validator/Brand")
 const CheckId = require("../../Middleware/CheckId")
-const { Paginate } = require("../../Helpers/Pagination")
+const { PaginateQueryParams, Paginate } = require("../../Helpers/Pagination")
 const { Slug, Host, DeleteFile, FileUpload } = require("../../Helpers/Index")
 
 // List of brands
 const Index = async (req, res, next) => {
     try {
-        const limit = 30
-        let { page } = req.query
-        if (!parseInt(page)) page = 1
-        if (page && parseInt(page) <= 0) page = 1
+        const { limit, page } = PaginateQueryParams(req.query)
 
         const totalItems = await Brand.countDocuments().exec()
         let results = await Brand.find({}, { name: 1, image: 1, products: 1 })
@@ -18,25 +15,20 @@ const Index = async (req, res, next) => {
             .limit(limit)
             .exec()
 
-        if (!results.length) {
-            return res.status(404).json({
-                status: false,
-                message: 'Brand not available'
+        if (results && results.length) {
+            results = await results.map(brand => {
+                return {
+                    _id: brand._id,
+                    name: brand.name,
+                    products: brand.products.length,
+                    image: brand.image ? Host(req) + "uploads/brand/" + brand.image : null
+                }
             })
         }
 
-        results = await results.map(brand => {
-            return {
-                _id: brand._id,
-                name: brand.name,
-                products: brand.products.length,
-                image: brand.image ? Host(req) + "uploads/brand/" + brand.image : null
-            }
-        })
-
         res.status(200).json({
             status: true,
-            brands: results,
+            data: results,
             pagination: Paginate({ page, limit, totalItems })
         })
 
@@ -152,7 +144,7 @@ const UpdateName = async (req, res, next) => {
 
         const updateBrand = await Brand.findOneAndUpdate(
             { _id: id },
-            { $set: { name: name, slug: Slug(name) } },
+            { $set: { name: name } },
             { new: true }).exec()
 
         if (!updateBrand) {

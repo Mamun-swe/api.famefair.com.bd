@@ -10,24 +10,19 @@ const Index = async (req, res, next) => {
             .populate("category", "name")
             .sort({ _id: -1 })
 
-        if (!results.length) {
-            return res.status(404).json({
-                status: false,
-                message: 'Banner not found.'
+        if (results && results.length) {
+            results = await results.map(banner => {
+                return {
+                    _id: banner._id,
+                    category: banner.category ? banner.category.name : null,
+                    image: Host(req) + "uploads/banner/" + banner.image
+                }
             })
         }
 
-        results = await results.map(banner => {
-            return {
-                _id: banner._id,
-                category: banner.category ? banner.category.name : null,
-                image: Host(req) + "uploads/banner/" + banner.image
-            }
-        })
-
         res.status(200).json({
             status: true,
-            banners: results
+            data: results
         })
 
     } catch (error) {
@@ -73,10 +68,7 @@ const Store = async (req, res, next) => {
         })
 
     } catch (error) {
-        if (error) {
-            console.log(error)
-            next(error)
-        }
+        if (error) next(error)
     }
 }
 

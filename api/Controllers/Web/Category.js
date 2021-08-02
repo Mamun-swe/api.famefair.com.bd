@@ -1,18 +1,14 @@
 const Product = require("../../../Models/Product")
 const Category = require("../../../Models/Category")
 const { Host } = require("../../Helpers/Index")
-const { Paginate } = require("../../Helpers/Pagination")
+const { PaginateQueryParams, Paginate } = require("../../Helpers/Pagination")
 const { RedisClient } = require("../../Cache/Index")
 
 // List of categories with product
 const Index = async (req, res, next) => {
     try {
         let categories = []
-
-        const limit = 2
-        let { page } = req.query
-        if (!parseInt(page)) page = 1
-        if (page && parseInt(page) <= 0) page = 1
+        const { limit, page } = PaginateQueryParams(req.query)
 
         // Count total documents
         const totalItems = await Category.countDocuments(
@@ -57,8 +53,6 @@ const Index = async (req, res, next) => {
                             image: product.images.small ? Host(req) + "uploads/product/small/" + product.images.small : null
                         })
                     }
-
-
                 }
 
                 categories.push({
@@ -72,7 +66,7 @@ const Index = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            categories,
+            data: categories,
             pagination: Paginate({ page, limit, totalItems })
         })
     } catch (error) {
@@ -104,7 +98,7 @@ const Show = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            category: result
+            data: result
         })
     } catch (error) {
         if (error) next(error)
@@ -116,11 +110,7 @@ const Products = async (req, res, next) => {
     try {
         let products = []
         const { category } = req.params
-
-        const limit = 30
-        let { page } = req.query
-        if (!parseInt(page)) page = 1
-        if (page && parseInt(page) <= 0) page = 1
+        const { limit, page } = PaginateQueryParams(req.query)
 
         // Count total documents
         const totalItems = await Product.countDocuments(
@@ -155,12 +145,6 @@ const Products = async (req, res, next) => {
             .limit(limit)
             .exec()
 
-        if (!results && !results.length) {
-            return res.status(404).json({
-                status: false,
-                message: "No products available."
-            })
-        }
 
         // Modify results
         if (results && results.length) {
@@ -177,7 +161,7 @@ const Products = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            products,
+            data: products,
             pagination: Paginate({ page, limit, totalItems })
         })
     } catch (error) {

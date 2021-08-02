@@ -1,12 +1,19 @@
 const fs = require("fs")
 const Jimp = require('jimp')
+delete require.cache[require.resolve('slugify')]
+const slugify = require('slugify')
 
 // Make Slug
 const Slug = (data) => {
-    let name = data.toLowerCase()
-    name = name.replace(/ /g, "-")
-    name = name + '-' + Date.now()
-    return name
+    let newSlug = slugify(data, {
+        replacement: '-',  // replace spaces with replacement character, defaults to `-`
+        remove: /[`/|*+~.()'"!:@]/g, // remove characters that match regex, defaults to `undefined`
+        lower: true,      // convert to lower case, defaults to `false`
+        strict: false,     // strip special characters except replacement, defaults to `false`
+        locale: 'vi'       // language code of the locale to use
+    })
+    newSlug = newSlug + '-' + Date.now()
+    return newSlug
 }
 
 // Get Host URL
@@ -67,7 +74,12 @@ const DeleteFile = (destination, file) => {
             return error
         }
         return
-    });
+    })
+}
+
+// Extract route group name
+const RouteGroupName = path => {
+    return path.replace(/\//g, " ").split(" ")[1]
 }
 
 
@@ -77,5 +89,6 @@ module.exports = {
     FileUpload,
     SmFileUpload,
     LgFileUpload,
-    DeleteFile
+    DeleteFile,
+    RouteGroupName
 }

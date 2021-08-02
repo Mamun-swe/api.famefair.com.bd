@@ -1,65 +1,7 @@
-const jwt = require("jsonwebtoken")
+
 const bcrypt = require("bcryptjs")
 const Admin = require("../../../Models/Admin")
 const Validator = require('../../Validator/Admin')
-
-// Login to account
-const Login = async (req, res, next) => {
-    try {
-        const { email, password } = req.body
-
-        // validate check
-        const validate = await Validator.Login({ email, password })
-        if (validate.isValid === false) {
-            return res.status(422).json({
-                status: false,
-                message: validate.error
-            })
-        }
-
-        // Account find using email 
-        const account = await Admin.findOne({ email: email }).exec()
-        if (!account) {
-            return res.status(404).json({
-                status: false,
-                message: 'Invalid e-mail or password'
-            })
-        }
-
-        // Check blocked
-        if (account.accountStatus === 'Deactive') {
-            return res.status(422).json({
-                status: false,
-                message: 'Your account has been blocked from authority.'
-            })
-        }
-
-        // Compare with password
-        const result = await bcrypt.compare(password, account.password)
-        if (!result) {
-            return res.status(404).json({
-                status: false,
-                message: 'Invalid e-mail or password'
-            })
-        }
-
-        // Generate JWT token
-        const token = await jwt.sign(
-            {
-                id: account._id,
-                role: account.role
-            }, process.env.JWT_SECRET, { expiresIn: '1d' }
-        )
-
-        return res.status(200).json({
-            status: true,
-            token
-        })
-
-    } catch (error) {
-        if (error) next(error)
-    }
-}
 
 // List of all Admin
 const Index = async (req, res, next) => {
@@ -69,16 +11,9 @@ const Index = async (req, res, next) => {
             { name: 1, email: 1, phone: 1, role: 1, status: 1, accountStatus: 1 }
         )
 
-        if (!admins.length) {
-            return res.status(404).json({
-                status: false,
-                message: 'Admin not found.'
-            })
-        }
-
         res.status(200).json({
             status: true,
-            admins
+            data: admins
         })
     } catch (error) {
         if (error) next(error)
@@ -104,7 +39,7 @@ const Show = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            admin
+            data: admin
         })
 
     } catch (error) {
@@ -226,7 +161,6 @@ const Update = async (req, res, next) => {
 }
 
 module.exports = {
-    Login,
     Index,
     Show,
     Create,

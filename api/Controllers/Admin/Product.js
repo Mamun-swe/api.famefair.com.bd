@@ -4,16 +4,13 @@ const Product = require("../../../Models/Product")
 const Category = require("../../../Models/Category")
 const Validator = require("../../Validator/Product")
 const CheckId = require("../../Middleware/CheckId")
-const { Paginate } = require("../../Helpers/Pagination")
+const { PaginateQueryParams, Paginate } = require("../../Helpers/Pagination")
 const { Slug, Host, SmFileUpload, LgFileUpload, DeleteFile } = require("../../Helpers/Index")
 
 // Index of products
 const Index = async (req, res, next) => {
     try {
-        const limit = 30
-        let { page } = req.query
-        if (!parseInt(page)) page = 1
-        if (page && parseInt(page) <= 0) page = 1
+        const { limit, page } = PaginateQueryParams(req.query)
 
         const totalItems = await Product.countDocuments().exec()
         let results = await Product.find(
@@ -37,32 +34,27 @@ const Index = async (req, res, next) => {
             .exec()
 
 
-        if (!results.length) {
-            return res.status(404).json({
-                status: false,
-                message: "Product are not available"
+        if (results.length) {
+            results = await results.map(product => {
+                return {
+                    _id: product._id,
+                    name: product.name,
+                    sku: product.sku,
+                    purchasePrice: product.purchasePrice,
+                    salePrice: product.salePrice,
+                    stockAmount: product.stockAmount,
+                    isActive: product.isActive,
+                    brand: product.brand ? product.brand.name : null,
+                    vendor: product.vendor ? product.vendor.name : null,
+                    category: product.category ? product.category.name : null,
+                    thumbnail: Host(req) + "uploads/product/small/" + product.images.small
+                }
             })
         }
 
-        results = await results.map(product => {
-            return {
-                _id: product._id,
-                name: product.name,
-                sku: product.sku,
-                purchasePrice: product.purchasePrice,
-                salePrice: product.salePrice,
-                stockAmount: product.stockAmount,
-                isActive: product.isActive,
-                brand: product.brand ? product.brand.name : null,
-                vendor: product.vendor ? product.vendor.name : null,
-                category: product.category ? product.category.name : null,
-                thumbnail: Host(req) + "uploads/product/small/" + product.images.small
-            }
-        })
-
         res.status(200).json({
             status: true,
-            products: results,
+            data: results,
             pagination: Paginate({ page, limit, totalItems })
         })
 
@@ -218,7 +210,7 @@ const Show = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            product
+            data: product
         })
 
     } catch (error) {
@@ -566,7 +558,7 @@ const Search = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            results
+            data: results
         })
     } catch (error) {
         if (error) next(error)
@@ -622,9 +614,8 @@ const SearchBySKU = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            product
+            data: product
         })
-
     } catch (error) {
         if (error) next(error)
     }
