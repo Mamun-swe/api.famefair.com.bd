@@ -6,10 +6,13 @@ const Validator = require('../../Validator/Admin')
 // List of all Admin
 const Index = async (req, res, next) => {
     try {
+        const { id } = req.user.id
         const admins = await Admin.find(
-            { _id: { $ne: req.user.id } },
+            { _id: { $ne: id } },
             { name: 1, email: 1, phone: 1, role: 1, status: 1, accountStatus: 1 }
         )
+            .populate("role", "role")
+            .exec()
 
         res.status(200).json({
             status: true,

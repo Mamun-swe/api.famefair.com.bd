@@ -28,7 +28,6 @@ adminRouter.get("/category", CategoryController.Index)
 adminRouter.post("/category", CategoryController.Store)
 adminRouter.get("/category/:id", CategoryController.Show)
 adminRouter.put("/category/:id", CategoryController.Update)
-adminRouter.put("/category/:id/image", CategoryController.UpdateImage)
 
 //  --------- Banner Routes -------------
 adminRouter.get("/banner", BannerController.Index)
@@ -39,9 +38,9 @@ adminRouter.delete("/banner/:id", BannerController.Delete)
 adminRouter.get("/brand", BrandController.Index)
 adminRouter.post("/brand", BrandController.Store)
 adminRouter.get("/brand/:id", BrandController.Show)
-adminRouter.put("/brand/:id/name", BrandController.UpdateName)
-adminRouter.put("/brand/:id/image", BrandController.UpdateImage)
+adminRouter.put("/brand/:id", BrandController.Update)
 adminRouter.delete("/brand/:id", BrandController.Delete)
+adminRouter.post("/brand/search", BrandController.Search)
 
 //  --------- Vendor Routes ------------
 adminRouter.get("/vendor", VendorController.Index)

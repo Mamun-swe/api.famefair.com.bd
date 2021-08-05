@@ -14,6 +14,7 @@ const Index = async (req, res, next) => {
         const results = await Vendor.find({}, { name: 1, email: 1, phone: 1, address: 1 })
             .skip((parseInt(page) * limit) - limit)
             .limit(limit)
+            .sort({ _id: -1 })
             .exec()
 
         res.status(200).json({

@@ -37,10 +37,10 @@ const adminSchema = new Schema({
         }
     },
     role: {
-        type: String,
-        trim: true,
-        default: 'Super admin',
-        required: true
+        type: Schema.Types.ObjectId,
+        ref: 'Role',
+        required: true,
+        default: 'Super admin'
     },
     status: {
         type: String,

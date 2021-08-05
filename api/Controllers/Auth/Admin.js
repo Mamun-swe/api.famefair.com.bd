@@ -10,7 +10,7 @@ const Login = async (req, res, next) => {
         const { email, password } = req.body
 
         // validate check
-        const validate = await Validator.Login(req.body)
+        const validate = await Validator.Login({ email, password })
         if (validate.isValid === false) {
             return res.status(422).json({
                 status: false,
@@ -19,7 +19,10 @@ const Login = async (req, res, next) => {
         }
 
         // Account find using email 
-        const account = await Admin.findOne({ email: email }).exec()
+        const account = await Admin.findOne({ email: email })
+            .populate("role")
+            .exec()
+
         if (!account) {
             return res.status(404).json({
                 status: false,
@@ -31,7 +34,7 @@ const Login = async (req, res, next) => {
         if (account.accountStatus === 'Deactive') {
             return res.status(422).json({
                 status: false,
-                message: 'Your account has been blocked from authority.'
+                message: 'Your account has been blocked from admin.'
             })
         }
 
@@ -48,7 +51,9 @@ const Login = async (req, res, next) => {
         const token = await jwt.sign(
             {
                 id: account._id,
-                role: account.role
+                name: account.name,
+                role: account.role.role,
+                permissions: account.role.rights
             }, process.env.JWT_SECRET, { expiresIn: '1d' }
         )
 
@@ -61,6 +66,7 @@ const Login = async (req, res, next) => {
         if (error) next(error)
     }
 }
+
 
 // Reset Password
 const Reset = async (req, res, next) => {
@@ -89,8 +95,6 @@ const Reset = async (req, res, next) => {
         // Password Hash
         const hashPassword = await bcrypt.hash(uniquePassword, 10)
 
-        // ---------- Password update login goes to here --------------------------
-
 
         // Mail transporter
         let transporter = nodemailer.createTransport({
@@ -103,7 +107,7 @@ const Reset = async (req, res, next) => {
 
         // send mail with defined transport object
         const mailService = await transporter.sendMail({
-            from: '"EazyBest.com" <no-reply@famefair.com>', // sender address
+            from: '"EazyBest.com" <no-reply@eazybest.com>', // sender address
             to: email, // list of receivers
             subject: "Password Reset", // Subject line
             html: `<p>Hello ${account.name} your password have been changed, Your new password is <b>${uniquePassword}</b>. <br/> Dont't share your password with anyone.</p>`, // html body
@@ -124,6 +128,7 @@ const Reset = async (req, res, next) => {
         if (error) next(error)
     }
 }
+
 
 
 module.exports = {

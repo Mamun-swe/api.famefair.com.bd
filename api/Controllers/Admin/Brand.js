@@ -11,6 +11,7 @@ const Index = async (req, res, next) => {
 
         const totalItems = await Brand.countDocuments().exec()
         let results = await Brand.find({}, { name: 1, image: 1, products: 1 })
+            .sort({ _id: -1 })
             .skip((parseInt(page) * limit) - limit)
             .limit(limit)
             .exec()
@@ -87,7 +88,6 @@ const Store = async (req, res, next) => {
     }
 }
 
-
 // Fetch single brand
 const Show = async (req, res, next) => {
     try {
@@ -106,7 +106,7 @@ const Show = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            brand
+            data: brand
         })
 
     } catch (error) {
@@ -114,10 +114,10 @@ const Show = async (req, res, next) => {
     }
 }
 
-
-// Update brand name
-const UpdateName = async (req, res, next) => {
+// Update brand
+const Update = async (req, res, next) => {
     try {
+        let uploadFile
         const { id } = req.params
         const { name } = req.body
         await CheckId(id)
@@ -126,7 +126,8 @@ const UpdateName = async (req, res, next) => {
         const validate = await Validator.UpdateName({ name })
         if (!validate.isValid) return res.status(422).json(validate.errors)
 
-        const brand = await Brand.findOne({ _id: id }, { name: 1 }).exec()
+        // Check available
+        const brand = await Brand.findOne({ _id: id }).exec()
         if (!brand) {
             return res.status(404).json({
                 status: false,
@@ -134,7 +135,8 @@ const UpdateName = async (req, res, next) => {
             })
         }
 
-        let exist = await Brand.findOne({ name })
+        // Check name exist
+        let exist = await Brand.findOne({ $and: [{ _id: { $ne: id } }, { name: name }] })
         if (exist) {
             return res.status(409).json({
                 status: false,
@@ -142,9 +144,31 @@ const UpdateName = async (req, res, next) => {
             })
         }
 
+        // if file available
+        if (req.files && req.files.image) {
+
+            // Delete old file
+            await DeleteFile('./uploads/brand/', brand.image)
+
+            // Upload new file
+            uploadFile = await FileUpload(req.files.image, './uploads/brand/')
+            if (!uploadFile) {
+                return res.status(501).json({
+                    status: false,
+                    message: 'Failed to upload image, Internat server error'
+                })
+            }
+        }
+
+        // Update brand
         const updateBrand = await Brand.findOneAndUpdate(
             { _id: id },
-            { $set: { name: name } },
+            {
+                $set: {
+                    name: name,
+                    image: req.files ? uploadFile : brand.image
+                }
+            },
             { new: true }).exec()
 
         if (!updateBrand) {
@@ -162,61 +186,6 @@ const UpdateName = async (req, res, next) => {
         if (error) next(error)
     }
 }
-
-
-// Update image
-const UpdateImage = async (req, res, next) => {
-    try {
-        const { id } = req.params
-        const file = req.files
-        await CheckId(id)
-
-        // validate check
-        const validate = await Validator.UpdateImage({ file })
-        if (!validate.isValid) return res.status(422).json(validate.errors)
-
-        const brand = await Brand.findOne({ _id: id }).exec()
-        if (!brand) {
-            return res.status(404).json({
-                status: false,
-                message: 'Brand not found'
-            })
-        }
-
-        // Delete old file
-        await DeleteFile('./uploads/brand/', brand.image)
-
-        // Upload new file
-        const uploadFile = await FileUpload(file.image, './uploads/brand/')
-        if (!uploadFile) {
-            return res.status(501).json({
-                status: false,
-                message: 'Failed to upload image, Internat server error'
-            })
-        }
-
-        const updateImage = await Brand.findByIdAndUpdate(
-            { _id: id },
-            { $set: { image: uploadFile } }
-        ).exec()
-
-        if (!updateImage) {
-            return res.status(501).json({
-                status: false,
-                message: 'Failed to update image.'
-            })
-        }
-
-        return res.status(201).json({
-            status: true,
-            message: 'Successfully image updated.'
-        })
-
-    } catch (error) {
-        if (error) next(error)
-    }
-}
-
 
 // Delete brand
 const Delete = async (req, res, next) => {
@@ -253,12 +222,51 @@ const Delete = async (req, res, next) => {
     }
 }
 
+// Search brand
+const Search = async (req, res, next) => {
+    try {
+        const { query } = req.body
+
+        if (!query) {
+            return res.status(422).json({
+                status: false,
+                query: 'Query is required'
+            })
+        }
+
+        let queryValue = new RegExp(query, 'i')
+        let results = await Brand.find(
+            { name: queryValue },
+            { name: 1, image: 1, products: 1 }
+        )
+            .sort({ _id: -1 })
+            .exec()
+
+        if (results && results.length) {
+            results = await results.map(brand => {
+                return {
+                    _id: brand._id,
+                    name: brand.name,
+                    products: brand.products.length,
+                    image: brand.image ? Host(req) + "uploads/brand/" + brand.image : null
+                }
+            })
+        }
+
+        res.status(200).json({
+            status: true,
+            data: results
+        })
+    } catch (error) {
+        if (error) next(error)
+    }
+}
 
 module.exports = {
     Index,
     Store,
     Show,
-    UpdateName,
-    UpdateImage,
-    Delete
+    Update,
+    Delete,
+    Search
 }

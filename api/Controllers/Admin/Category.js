@@ -98,21 +98,54 @@ const Show = async (req, res, next) => {
 // Update Category
 const Update = async (req, res, next) => {
     try {
+        let uploadFile
         const { id } = req.params
         const { name } = req.body
         await CheckId(id)
 
-        const category = await Category.findOne({ name: name }).exec()
-        if (category) {
+        // Check available
+        const category = await Category.findOne({ _id: id }).exec()
+        if (!category) {
             return res.status(404).json({
                 status: false,
-                message: 'This name already exist'
+                message: 'Category not found'
             })
+        }
+
+        // Check name exist
+        let exist = await Category.findOne({ $and: [{ _id: { $ne: id } }, { name: name }] })
+        if (exist) {
+            return res.status(409).json({
+                status: false,
+                message: 'This category already exist'
+            })
+        }
+
+
+        // if file available
+        if (req.files && req.files.image) {
+
+            // Delete old file
+            await DeleteFile('./uploads/category/', category.image)
+
+            // Upload new file
+            uploadFile = await FileUpload(req.files.image, './uploads/category/')
+            if (!uploadFile) {
+                return res.status(501).json({
+                    status: false,
+                    message: 'Failed to upload image, Internat server error'
+                })
+            }
         }
 
         const updateCategory = await Category.findOneAndUpdate(
             { _id: id },
-            { $set: { name: name } },
+            {
+                $set: {
+                    name: name,
+                    image: req.files ? uploadFile : category.image
+                }
+            },
             { new: true }).exec()
 
         if (!updateCategory) {
@@ -132,56 +165,9 @@ const Update = async (req, res, next) => {
     }
 }
 
-
-// Update image
-const UpdateImage = async (req, res, next) => {
-    try {
-        const { id } = req.params
-        const file = req.files
-        await CheckId(id)
-
-        // validate check
-        const validate = await Validator.Image({ file })
-        if (!validate.isValid) {
-            return res.status(422).json(validate.errors)
-        }
-
-        const category = await Category.findById({ _id: id }, { products: 0 }).exec()
-        if (!category) {
-            return res.status(409).json({
-                status: false,
-                message: 'Category not found'
-            })
-        }
-
-        if (category.image) await DeleteFile('./uploads/category/', category.image)
-
-        const uploadFile = await FileUpload(file.image, './uploads/category/')
-        if (uploadFile) {
-            const updateImage = await Category.findByIdAndUpdate({ _id: id }, { $set: { image: uploadFile } }).exec()
-            if (!updateImage) {
-                return res.status(501).json({
-                    status: false,
-                    message: 'Failed to update image.'
-                })
-            }
-
-            return res.status(201).json({
-                status: true,
-                message: 'Successfully image updated.'
-            })
-        }
-
-    } catch (error) {
-        if (error) next(error)
-    }
-}
-
-
 module.exports = {
     Index,
     Store,
     Show,
-    Update,
-    UpdateImage
+    Update
 }

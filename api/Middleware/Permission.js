@@ -15,9 +15,14 @@ const Admin = async (req, res, next) => {
 
         // Match with roles
         const isRole = await Role.findOne({
-            $and: [
-                { role: decode.role },
-                { rights: { $in: [pathGroup] } }
+            $or: [
+                {
+                    $and: [
+                        { role: decode.role },
+                        { rights: { $in: [pathGroup] } }
+                    ]
+                },
+                { $and: [{ role: decode.role }, { rights: { $in: ["all"] } }] }
             ]
         }).exec()
 
