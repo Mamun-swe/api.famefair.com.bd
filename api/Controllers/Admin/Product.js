@@ -127,7 +127,7 @@ const Store = async (req, res, next) => {
             stockAmount,
             purchasePrice,
             salePrice,
-            additionalInfo,
+            additionalInfo: JSON.parse(additionalInfo),
             description,
             video,
             slug: Slug(name),
@@ -276,19 +276,25 @@ const Update = async (req, res, next) => {
         ).exec()
 
 
-        // Remove product from brand
-        await Brand.findOneAndUpdate(
-            { _id: foundProduct.brand },
-            { $pull: { products: { $in: [`${foundProduct._id}`] } } },
-            { multi: true }
-        ).exec()
+        // Brand
+        if (brand) {
 
-        // Update brand with new product
-        await Brand.findOneAndUpdate(
-            { _id: brand },
-            { $push: { products: id } },
-            { new: true }
-        ).exec()
+            if (foundProduct.brand) {
+                // Remove product from brand
+                await Brand.findOneAndUpdate(
+                    { _id: foundProduct.brand },
+                    { $pull: { products: { $in: [`${foundProduct._id}`] } } },
+                    { multi: true }
+                ).exec()
+            }
+
+            // Update brand with new product
+            await Brand.findOneAndUpdate(
+                { _id: brand },
+                { $push: { products: id } },
+                { new: true }
+            ).exec()
+        }
 
 
         // Remove product form category
