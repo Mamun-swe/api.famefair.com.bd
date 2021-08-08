@@ -32,13 +32,8 @@ const Show = async (req, res, next) => {
             { _id: id },
             { password: 0, status: 0, createdAt: 0, updatedAt: 0 }
         )
-
-        if (!admin) {
-            return res.status(404).json({
-                status: false,
-                message: 'Admin not found.'
-            })
-        }
+            .populate("role", "role")
+            .exec()
 
         res.status(200).json({
             status: true,

@@ -13,8 +13,8 @@ const RatingReviewController = require("../Controllers/Admin/RatingReview")
 
 // ----------- Admin Routes ------------
 adminRouter.get("/admin", AdminController.Index)
-adminRouter.get("/admin/:id", AdminController.Show)
 adminRouter.post("/admin", AdminController.Create)
+adminRouter.get("/admin/:id", AdminController.Show)
 adminRouter.put("/admin/:id", AdminController.Update)
 
 //  ---------- Dashboard Route -----------
@@ -55,11 +55,11 @@ adminRouter.post("/product", ProductController.Store)
 adminRouter.get("/product/:id", ProductController.Show)
 adminRouter.put("/product/:id", ProductController.Update)
 adminRouter.get("/product/status/:id", ProductController.UpdateStatus)
+adminRouter.get("/product/status/vendor/:id", ProductController.UpdateVendorStatus)
 adminRouter.put("/product/sm-image/:id", ProductController.UpdateSMImage)
 adminRouter.put("/product/additional-image/:id", ProductController.AddAdditionalImage)
 adminRouter.delete("/product/additional-image/:id/:file", ProductController.RemoveAdditionalImage)
 adminRouter.post("/product/search", ProductController.Search)
-adminRouter.get("/product/search/:sku", ProductController.SearchBySKU)
 
 //  --------- Customer Routes ------------ 
 adminRouter.get("/customer", CustomerController.Index)

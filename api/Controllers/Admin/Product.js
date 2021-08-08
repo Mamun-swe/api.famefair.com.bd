@@ -385,6 +385,42 @@ const UpdateStatus = async (req, res, next) => {
     }
 }
 
+// Vendor request approve / decline 
+const UpdateVendorStatus = async (req, res, next) => {
+    try {
+        const { id } = req.params
+        await CheckId(id)
+
+        const item = await Product.findById({ _id: id }, { vendorRequest: 1 }).exec()
+        if (!item) {
+            return res.status(404).json({
+                status: false,
+                message: 'Product not found.'
+            })
+        }
+
+        const result = await Product.findByIdAndUpdate(
+            { _id: id },
+            { $set: { vendorRequest: item.vendorRequest === "Approved" ? "Pending" : "Approved" } }
+        ).exec()
+
+        if (!result) {
+            return res.status(501).json({
+                status: false,
+                message: 'Failed to update status.'
+            })
+        }
+
+        res.status(201).json({
+            status: true,
+            message: 'Successfully status updated.'
+        })
+
+    } catch (error) {
+        if (error) next(error)
+    }
+}
+
 // Update specific product small image
 const UpdateSMImage = async (req, res, next) => {
     try {
@@ -571,61 +607,7 @@ const Search = async (req, res, next) => {
     }
 }
 
-// Search using SKU
-const SearchBySKU = async (req, res, next) => {
-    try {
-        const { sku } = req.params
-        let result = await Product.findOne(
-            {
-                $and: [
-                    { stockAmount: { $gt: 0 } },
-                    { vendorRequest: 'Approved' },
-                    { sku: sku },
-                    { isActive: true }
-                ]
-            },
-            {
-                name: 1,
-                sku: 1,
-                purchasePrice: 1,
-                salePrice: 1,
-                stockAmount: 1,
-                isActive: 1,
-                'images.small': 1
-            })
-            .populate("brand", "name")
-            .populate("vendor", "name")
-            .populate("category", "name")
-            .exec()
 
-        if (!result) {
-            return res.status(404).json({
-                status: false,
-                message: 'Product not found.'
-            })
-        }
-
-        const product = {
-            _id: result._id,
-            name: result.name,
-            sku: result.sku,
-            purchasePrice: result.purchasePrice,
-            salePrice: result.salePrice,
-            stockAmount: result.stockAmount,
-            brand: result.brand ? result.brand : null,
-            vendor: result.vendor ? result.vendor : null,
-            category: result.category ? result.category : null,
-            thumbnail: Host(req) + "uploads/product/small/" + result.images.small
-        }
-
-        res.status(200).json({
-            status: true,
-            data: product
-        })
-    } catch (error) {
-        if (error) next(error)
-    }
-}
 
 module.exports = {
     Index,
@@ -633,9 +615,9 @@ module.exports = {
     Show,
     Update,
     UpdateStatus,
+    UpdateVendorStatus,
     UpdateSMImage,
     AddAdditionalImage,
     RemoveAdditionalImage,
-    Search,
-    SearchBySKU
+    Search
 }
