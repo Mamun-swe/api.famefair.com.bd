@@ -63,8 +63,8 @@ adminRouter.post("/product/search", ProductController.Search)
 
 //  --------- Customer Routes ------------ 
 adminRouter.get("/customer", CustomerController.Index)
-adminRouter.get("/customer/:id", CustomerController.Show)
 adminRouter.post("/customer", CustomerController.Store)
+adminRouter.get("/customer/:id", CustomerController.Show)
 adminRouter.put("/customer/:id", CustomerController.Update)
 adminRouter.post("/customer/search", CustomerController.Search)
 

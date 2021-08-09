@@ -78,8 +78,6 @@ const Update = customer => {
     if (customer.maritalStatus && !statusType) error.maritalStatus = `${customer.maritalStatus} is not valid`
 
     if (!customer.dob) error.dob = "Date of birth is Required"
-    if (!customer.shippingArea) error.shippingArea = "Shipping area is Required"
-    if (!customer.deliveryAddress) error.deliveryAddress = "Delivery address is Required"
 
     return {
         error,

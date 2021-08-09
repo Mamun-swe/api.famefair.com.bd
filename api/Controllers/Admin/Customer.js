@@ -10,7 +10,7 @@ const Index = async (req, res, next) => {
         const { limit, page } = PaginateQueryParams(req.query)
 
         const totalItems = await Customer.countDocuments().exec()
-        const customers = await Customer.find({}, { name: 1, email: 1, phone: 1 })
+        const customers = await Customer.find({}, { name: 1, email: 1, phone: 1, gender: 1 })
             .sort({ _id: -1 })
             .skip((parseInt(page) * limit) - limit)
             .limit(limit)
@@ -20,30 +20,6 @@ const Index = async (req, res, next) => {
             status: true,
             data: customers,
             pagination: Paginate({ page, limit, totalItems })
-        })
-    } catch (error) {
-        if (error) next(error)
-    }
-}
-
-// Show specific customer
-const Show = async (req, res, next) => {
-    try {
-        const { id } = req.params
-        await CheckId(id)
-
-        const customer = await Customer.findById({ _id: id }, { password: 0 }).exec()
-
-        if (!customer) {
-            return res.status(404).json({
-                status: false,
-                message: 'Customer not found.'
-            })
-        }
-
-        res.status(200).json({
-            status: true,
-            data: customer
         })
     } catch (error) {
         if (error) next(error)
@@ -121,6 +97,30 @@ const Store = async (req, res, next) => {
     }
 }
 
+// Show specific customer
+const Show = async (req, res, next) => {
+    try {
+        const { id } = req.params
+        await CheckId(id)
+
+        const customer = await Customer.findById({ _id: id }, { password: 0 }).exec()
+
+        if (!customer) {
+            return res.status(404).json({
+                status: false,
+                message: 'Customer not found.'
+            })
+        }
+
+        res.status(200).json({
+            status: true,
+            data: customer
+        })
+    } catch (error) {
+        if (error) next(error)
+    }
+}
+
 // Update specific customer
 const Update = async (req, res, next) => {
     try {
@@ -132,9 +132,7 @@ const Update = async (req, res, next) => {
             phone,
             gender,
             maritalStatus,
-            dob,
-            shippingArea,
-            deliveryAddress
+            dob
         } = req.body
 
         // validate check
@@ -155,9 +153,7 @@ const Update = async (req, res, next) => {
                     phone,
                     gender,
                     maritalStatus,
-                    dob,
-                    shippingArea,
-                    deliveryAddress
+                    dob
                 }
             }
         ).exec()
@@ -193,7 +189,7 @@ const Search = async (req, res, next) => {
         let queryValue = new RegExp(query, 'i')
         let results = await Customer.find(
             { $or: [{ name: queryValue }, { email: queryValue }, { phone: queryValue }] },
-            { name: 1, email: 1, phone: 1 }
+            { name: 1, email: 1, phone: 1, gender: 1 }
         )
             .sort({ _id: -1 })
             .exec()
@@ -209,8 +205,8 @@ const Search = async (req, res, next) => {
 
 module.exports = {
     Index,
-    Show,
     Store,
+    Show,
     Update,
     Search
 }
