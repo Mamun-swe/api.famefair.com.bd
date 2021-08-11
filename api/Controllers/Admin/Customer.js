@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const bcrypt = require('bcryptjs')
 const Customer = require('../../../Models/Customer')
 const CheckId = require('../../Middleware/CheckId')
@@ -103,7 +104,7 @@ const Show = async (req, res, next) => {
         const { id } = req.params
         await CheckId(id)
 
-        const customer = await Customer.findById({ _id: id }, { password: 0 }).exec()
+        let customer = await Customer.findOne({ _id: id }, { password: 0 }).exec()
 
         if (!customer) {
             return res.status(404).json({
@@ -111,6 +112,9 @@ const Show = async (req, res, next) => {
                 message: 'Customer not found.'
             })
         }
+
+        customer.deliveryAddress = _.last(customer.deliveryAddress)
+        customer.shippingArea = _.last(customer.shippingArea)
 
         res.status(200).json({
             status: true,
