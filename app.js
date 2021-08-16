@@ -1,4 +1,5 @@
 const express = require("express")
+const path = require("path")
 const cors = require("cors")
 const morgan = require("morgan")
 const mongoose = require('mongoose')
@@ -19,6 +20,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(nocache())
 
+app.use(express.static("public"))
 app.use('/uploads/banner', express.static('uploads/banner/'))
 app.use('/uploads/brand', express.static('uploads/brand/'))
 app.use('/uploads/category', express.static('uploads/category/'))
@@ -35,7 +37,7 @@ const Route = require('./api/Routes/Index')
 app.use("/api/v1/", Route)
 
 app.get('/', async (req, res) => {
-    res.send("Hello I am node.js application!! WOW")
+    res.sendFile(path.join(__dirname, '/public/index.html'))
 })
 
 app.use((req, res, next) => {
