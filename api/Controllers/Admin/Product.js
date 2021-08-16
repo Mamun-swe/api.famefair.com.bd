@@ -214,7 +214,10 @@ const Show = async (req, res, next) => {
         })
 
     } catch (error) {
-        if (error) next(error)
+        if (error) {
+            console.log(error)
+            next(error)
+        }
     }
 }
 
