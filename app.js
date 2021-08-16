@@ -35,7 +35,7 @@ const Route = require('./api/Routes/Index')
 app.use("/api/v1/", Route)
 
 app.get('/', async (req, res) => {
-    res.send("Hello I am node.js application in production mode")
+    res.send("Hello I am node.js application!! WOW")
 })
 
 app.use((req, res, next) => {
