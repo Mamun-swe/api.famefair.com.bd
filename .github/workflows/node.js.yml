@@ -5,9 +5,9 @@ name: Node.js CI
 
 on:
   push:
+    paths-ignore:
+      - '.uploads'
     branches: [ master ]
-  paths-ignore:
-    - uploads
 
 jobs:
   build:
