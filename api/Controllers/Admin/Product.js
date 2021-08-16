@@ -127,7 +127,7 @@ const Store = async (req, res, next) => {
             stockAmount,
             purchasePrice,
             salePrice,
-            additionalInfo: JSON.parse(additionalInfo),
+            additionalInfo: additionalInfo ? JSON.parse(additionalInfo) : null,
             description,
             video,
             slug: Slug(name),
