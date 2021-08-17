@@ -37,7 +37,8 @@ const Route = require('./api/Routes/Index')
 app.use("/api/v1/", Route)
 
 app.get('/', async (req, res) => {
-    res.sendFile(path.join(__dirname, '/public/index.html'))
+    // res.sendFile(path.join(__dirname, '/public/index.html'))
+    res.send("WOW!")
 })
 
 app.use((req, res, next) => {
