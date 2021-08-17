@@ -38,7 +38,9 @@ app.use("/api/v1/", Route)
 
 app.get('/', async (req, res) => {
     // res.sendFile(path.join(__dirname, '/public/index.html'))
-    res.send("WOW!")
+    res.status(200).json({
+        message: "Wow!"
+    })
 })
 
 app.use((req, res, next) => {
