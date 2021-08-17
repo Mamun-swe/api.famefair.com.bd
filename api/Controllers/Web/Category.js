@@ -8,12 +8,7 @@ const { RedisClient } = require("../../Cache/Index")
 const Index = async (req, res, next) => {
     try {
         let categories = []
-        const { limit, page } = PaginateQueryParams(req.query)
-
-        // Count total documents
-        const totalItems = await Category.countDocuments(
-            { products: { $exists: true, $not: { $size: 0 } } }
-        ).exec()
+        const { page } = req.query
 
         // Find categories where products available
         const results = await Category.find(
@@ -28,13 +23,13 @@ const Index = async (req, res, next) => {
                     vendorRequest: { $eq: "Approved" }
                 },
                 options: {
-                    perDocumentLimit: 12,
+                    perDocumentLimit: 14,
                     sort: { _id: -1 }
                 }
             })
             .sort({ _id: -1 })
-            .skip((parseInt(page) * limit) - limit)
-            .limit(limit)
+            .skip((parseInt(page) * 2) - 2)
+            .limit(2)
             .exec()
 
         // Modify results
@@ -66,8 +61,7 @@ const Index = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            data: categories,
-            pagination: Paginate({ page, limit, totalItems })
+            data: categories
         })
     } catch (error) {
         if (error) next(error)
