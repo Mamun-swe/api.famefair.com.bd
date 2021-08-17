@@ -2,6 +2,7 @@ const Banner = require("../../../Models/Banner")
 const { Host } = require("../../Helpers/Index")
 const { RedisClient } = require("../../Cache/Index")
 
+
 // List of banners
 const Index = async (req, res, next) => {
     try {
