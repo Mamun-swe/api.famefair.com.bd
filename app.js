@@ -20,7 +20,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(nocache())
 
-app.use(express.static("public"))
+// app.use(express.static("public"))
 app.use('/uploads/banner', express.static('uploads/banner/'))
 app.use('/uploads/brand', express.static('uploads/brand/'))
 app.use('/uploads/category', express.static('uploads/category/'))
@@ -38,9 +38,7 @@ app.use("/api/v1/", Route)
 
 app.get('/', async (req, res) => {
     // res.sendFile(path.join(__dirname, '/public/index.html'))
-    res.status(200).json({
-        message: "Wow!"
-    })
+    res.send("Wow!")
 })
 
 app.use((req, res, next) => {
