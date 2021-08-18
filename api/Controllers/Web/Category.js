@@ -1,7 +1,6 @@
 const Product = require("../../../Models/Product")
 const Category = require("../../../Models/Category")
 const { Host } = require("../../Helpers/Index")
-const { PaginateQueryParams, Paginate } = require("../../Helpers/Pagination")
 const { RedisClient } = require("../../Cache/Index")
 
 // List of categories with product
