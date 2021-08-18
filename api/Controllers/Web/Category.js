@@ -104,19 +104,7 @@ const Products = async (req, res, next) => {
     try {
         let products = []
         const { category } = req.params
-        const { limit, page } = PaginateQueryParams(req.query)
-
-        // Count total documents
-        const totalItems = await Product.countDocuments(
-            {
-                $and: [
-                    { category: category },
-                    { isActive: true },
-                    { stockAmount: { $gt: 0 } },
-                    { vendorRequest: "Approved" },
-                ]
-            }
-        ).exec()
+        const { page } = req.query
 
         // Find matched products
         const results = await Product.find(
@@ -124,7 +112,6 @@ const Products = async (req, res, next) => {
                 $and: [
                     { category: category },
                     { isActive: true },
-                    { stockAmount: { $gt: 0 } },
                     { vendorRequest: "Approved" },
                 ]
             },
@@ -135,8 +122,8 @@ const Products = async (req, res, next) => {
             }
         )
             .sort({ _id: -1 })
-            .skip((parseInt(page) * limit) - limit)
-            .limit(limit)
+            .skip((parseInt(page) * 28) - 28)
+            .limit(28)
             .exec()
 
 
@@ -155,8 +142,7 @@ const Products = async (req, res, next) => {
 
         res.status(200).json({
             status: true,
-            data: products,
-            pagination: Paginate({ page, limit, totalItems })
+            data: products
         })
     } catch (error) {
         if (error) next(error)

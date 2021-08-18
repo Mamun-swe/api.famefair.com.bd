@@ -30,7 +30,7 @@ const Category = async (req, res, next) => {
             if (result) {
                 return res.status(200).json({
                     status: true,
-                    category: JSON.parse(result)
+                    data: JSON.parse(result)
                 })
             } else {
                 next()
@@ -49,7 +49,7 @@ const Product = async (req, res, next) => {
             if (result) {
                 return res.status(200).json({
                     status: true,
-                    product: JSON.parse(result)
+                    data: JSON.parse(result)
                 })
             } else {
                 next()
