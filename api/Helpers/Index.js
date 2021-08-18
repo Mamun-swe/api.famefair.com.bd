@@ -18,9 +18,9 @@ const Slug = (data) => {
 
 // Get Host URL
 const Host = (req) => {
-    // return req.protocol + '://' + req.get('host') + '/'
+    return req.protocol + '://' + req.get('host') + '/'
     // // // return 'https://' + req.get('host') + '/'
-    return 'http://157.245.192.70:4000/'
+    // return 'http://157.245.192.70:4000/'
 }
 
 // Single file upload
