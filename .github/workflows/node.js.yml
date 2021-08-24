@@ -3,7 +3,7 @@
 
 name: Node.js CI
 
-if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+on: [push, pull_request]
     branches: [ master ]
 
 jobs:
