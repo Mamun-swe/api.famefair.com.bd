@@ -4,7 +4,6 @@
 name: Node.js CI
 
 on:  
-  push:
   if: github.event.pull_request.merged == true 
     branches: [ master ]
 
