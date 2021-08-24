@@ -3,17 +3,15 @@
 
 name: Node.js CI
 
-on:
+on:  
   push:
+  pull_request:
     branches: [ master ]
-
-    paths-ignore:
-    - 'uploads/**'
 
 jobs:
   build:
 
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
