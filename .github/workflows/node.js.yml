@@ -8,35 +8,27 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+   pull-request:
     runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v2
+    - name: pull-request
+      uses: repo-sync/pull-request@v2
+  # build:
 
-    strategy:
-      matrix:
-        node-version: [16.x]
+  #   runs-on: self-hosted
+
+  #   strategy:
+  #     matrix:
+  #       node-version: [16.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
-    steps:
+    # steps:
     # - uses: actions/checkout@v2
     # - name: Use Node.js ${{ matrix.node-version }}
     #   uses: actions/setup-node@v2
-    - uses: actions/checkout@v2
-      - name: Create commits
-        run: |
-          git config user.name 'Peter Evans'
-          git config user.email 'peter-evans@users.noreply.github.com'
-          date +%s > report.txt
-          git commit -am "Modify tracked file during workflow"
-          date +%s > new-report.txt
-          git add -A
-          git commit -m "Add untracked file during workflow"
-      - name: Uncommitted change
-        run: date +%s > report.txt
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm i
-    - run: pm2 restart API
+    #   with:
+    #     node-version: ${{ matrix.node-version }}
+    #     cache: 'npm'
+    # - run: npm i
+    # - run: pm2 restart API
